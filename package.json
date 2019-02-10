@@ -1,0 +1,28 @@
+{
+    "name": "regexjs",
+    "version": "1.0.0",
+    "description": "Finite State Machines",
+    "main": "index.js",
+    "scripts": {
+        "start": "node src/index",
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/deniskyashif/regexjs.git"
+    },
+    "keywords": [
+        "automata",
+        "finite state machines",
+        "regex"
+    ],
+    "author": "deniskyashif",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/deniskyashif/regexjs/issues"
+    },
+    "homepage": "https://github.com/deniskyashif/regexjs#readme",
+    "devDependencies": {
+        "jest": "^24.0.0"
+    }
+}
