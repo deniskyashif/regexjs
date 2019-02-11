@@ -11,9 +11,10 @@ function addEpsilonTransition(from, to) {
 }
 
 function addTransition(from, to, symbol) {
-    if(from.transitions[symbol]) {
+    if(!from.transitions[symbol]) {
         from.transitions[symbol] = [];
     }
+
     from.transitions[symbol].push(to);
 }
 
@@ -25,7 +26,7 @@ function concat(first, second) {
 }
 
 function union(first, second) {
-    const start = createState();
+    const start = createState(false);
     addEpsilonTransition(start, first.start);
     addEpsilonTransition(start, second.start);
 
@@ -40,7 +41,7 @@ function union(first, second) {
 }
 
 function closure(nfa) {
-    const start = createState();
+    const start = createState(false);
     const end = createState(true);
 
     addEpsilonTransition(start, end);
@@ -53,18 +54,88 @@ function closure(nfa) {
     return { start, end };
 }
 
-function createEpsilonNFA() {
-    const start = createState();
+function fromEpsilon() {
+    const start = createState(false);
     const end = createState(true);
     addEpsilonTransition(start, end);
     
     return { start, end };
 }
 
-function createSymbolNFA(symbol) {
-    const start = createState();
+function fromSymbol(symbol) {
+    const start = createState(false);
     const end = createState(true);
     addTransition(start, end, symbol);
 
     return { start, end };
 }
+
+function toNFA(postfixExp) {
+    if(postfixExp === '') {
+        return fromEpsilon();
+    }
+
+    const stack = [];
+
+    for (let i = 0; i < postfixExp.length; i++) {
+        const token = postfixExp[i];
+
+        if(token === '*') {
+            stack.push(closure(stack.pop()));
+        } else if (token === '|') {
+            stack.push(union(
+                stack.pop(),
+                stack.pop()
+            ));
+        } else if (token === '.') {
+            const right = stack.pop();
+            const left = stack.pop();
+            stack.push(concat(left, right));
+        } else {
+            stack.push(fromSymbol(token));
+        }
+    }
+
+    return stack.pop();
+}
+
+function move(state, visited, input, position) {
+    if(visited.includes(state)) {
+        return false;
+    }
+
+    visited.push(state);
+
+    if(position === input.length) {
+        if(state.isEnd) {
+            return true;
+        }
+
+        if(state.epsilonTransitions.some(s => move(s, visited, input, position))) {
+            return true;
+        }
+    } else {
+        const transitions = state.transitions[input[position]];
+
+        if(transitions && transitions.length) {
+            if(transitions.some(s => move(s, [], input, position + 1))) {
+                return true;
+            }
+        }
+
+        if(state.epsilonTransitions.some(s => move(s, visited, input, position))) {
+            return true;
+        }        
+
+        return false;
+    }
+}
+
+function recognize(nfa, word) {
+    return move(nfa.start, [], word, 0);
+}
+
+module.exports = {
+    toNFA,
+    recognize
+};

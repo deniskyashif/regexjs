@@ -1,18 +1,13 @@
 const { insertExplicitConcatSymbol, toPostfix } = require('./parser');
-
-function compile(postfix) {
-    
-}
-
-function recognize(nfa, word) {
-    
-}
+const { toNFA, recognize } = require('./nfa');
 
 function createMatcher(exp) {
-    const nfa = compile(toPostfix(insertExplicitConcatSymbol(exp)));
+    const postfixExp = toPostfix(insertExplicitConcatSymbol(exp));
+    const nfa = toNFA(postfixExp);
 
     return function(word) {
         return recognize(nfa, word);
     };
 }
 
+module.exports = { createMatcher };
