@@ -8,6 +8,13 @@ describe.only('createMatcher tests', () => {
         expect(match(' ab')).toBeFalsy();
     });
 
+    test('from a should recognize strings of arbitrary number of a', () => {
+        const match = createMatcher('a');
+        expect(match('')).toBeFalsy();
+        expect(match('a')).toBeTruthy();
+        expect(match('aaa')).toBeFalsy();
+    });
+
     test('from a* should recognize strings of arbitrary number of a\'s', () => {
         const match = createMatcher('a*');
         expect(match('')).toBeTruthy();
@@ -23,5 +30,34 @@ describe.only('createMatcher tests', () => {
         expect(match('aab')).toBeTruthy();
         expect(match('b')).toBeTruthy();
         expect(match('aba')).toBeFalsy();
-    });    
+    });
+
+    test('from "(0|(1(01*(00)*0)*1)*)*" should recognize its language', () => {
+        const match = createMatcher('(0|(1(01*(00)*0)*1)*)*');
+        expect(match('')).toBeTruthy();
+        expect(match('0')).toBeTruthy();
+        expect(match('00')).toBeTruthy();
+        expect(match('11')).toBeTruthy();
+        expect(match('000')).toBeTruthy();
+        expect(match('011')).toBeTruthy();
+        expect(match('110')).toBeTruthy();
+        expect(match('0000')).toBeTruthy();
+        expect(match('0011')).toBeTruthy();
+    });
+
+    test('from "(a|b)*c" should recognize strings with arbitrary number of a\'s and b\'s ending with c', () => {
+        const match = createMatcher('(a|b)*c');
+        expect(match('c')).toBeTruthy();
+        expect(match('ac')).toBeTruthy();
+        expect(match('ababc')).toBeTruthy();
+        expect(match('bbbc')).toBeTruthy();
+        expect(match('aaaaaaac')).toBeTruthy();
+        expect(match('ac')).toBeTruthy();
+        expect(match('bac')).toBeTruthy();
+        expect(match('abbbbc')).toBeTruthy();
+        expect(match('cc')).toBeFalsy();
+        expect(match('a')).toBeFalsy();
+        expect(match('b')).toBeFalsy();
+        expect(match('ababab')).toBeFalsy();
+    });
 });

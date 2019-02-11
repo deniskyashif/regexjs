@@ -33,9 +33,9 @@ function union(first, second) {
     const end = createState(true);
 
     addEpsilonTransition(first.end, end);
-    first.isEnd = false;
+    first.end.isEnd = false;
     addEpsilonTransition(second.end, end);
-    second.isEnd = false;
+    second.end.isEnd = false;
 
     return { start, end };
 }
@@ -83,10 +83,9 @@ function toNFA(postfixExp) {
         if(token === '*') {
             stack.push(closure(stack.pop()));
         } else if (token === '|') {
-            stack.push(union(
-                stack.pop(),
-                stack.pop()
-            ));
+            const right = stack.pop();
+            const left = stack.pop();
+            stack.push(union(left, right));
         } else if (token === '.') {
             const right = stack.pop();
             const left = stack.pop();
