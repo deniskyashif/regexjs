@@ -81,5 +81,9 @@ describe('toPostfix tests', () => {
     test('call with ((a.b)*) should return ab.*', () => {
         expect(toPostfix('((a.b)*)')).toEqual('ab.*');
     });
+
+    test('call with "(a|b)*cd" should return "ab|*c.d."', () => {
+        expect(toPostfix('(a|b)*.c.d')).toEqual('ab|*c.d.');
+    });
 });
 
