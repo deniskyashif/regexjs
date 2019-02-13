@@ -18,6 +18,24 @@ function addTransition(from, to, symbol) {
     from.transitions[symbol].push(to);
 }
 
+// constructs an NFA recognizing the empty string
+function fromEpsilon() {
+    const start = createState(false);
+    const end = createState(true);
+    addEpsilonTransition(start, end);
+    
+    return { start, end };
+}
+
+// constructs an NFA recognizing a single character
+function fromSymbol(symbol) {
+    const start = createState(false);
+    const end = createState(true);
+    addTransition(start, end, symbol);
+
+    return { start, end };
+}
+
 function concat(first, second) {
     addEpsilonTransition(first.end, second.start);
     first.end.isEnd = false;
@@ -50,22 +68,6 @@ function closure(nfa) {
     addEpsilonTransition(nfa.end, end);
     addEpsilonTransition(nfa.end, nfa.start);
     nfa.end.isEnd = false;
-
-    return { start, end };
-}
-
-function fromEpsilon() {
-    const start = createState(false);
-    const end = createState(true);
-    addEpsilonTransition(start, end);
-    
-    return { start, end };
-}
-
-function fromSymbol(symbol) {
-    const start = createState(false);
-    const end = createState(true);
-    addTransition(start, end, symbol);
 
     return { start, end };
 }

@@ -1,6 +1,6 @@
 const { createMatcher } = require('../src/regex');
 
-describe.only('createMatcher tests', () => {
+describe('createMatcher tests', () => {
     test('from empty string should recognize only empty string', () => {
         const match = createMatcher('');
         expect(match('')).toBeTruthy();
@@ -32,6 +32,7 @@ describe.only('createMatcher tests', () => {
         expect(match('aba')).toBeFalsy();
     });
 
+    // regex for all binary numbers divisible by 3
     test('from "(0|(1(01*(00)*0)*1)*)*" should recognize its language', () => {
         const match = createMatcher('(0|(1(01*(00)*0)*1)*)*');
         expect(match('')).toBeTruthy();

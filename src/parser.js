@@ -1,4 +1,4 @@
-function insertExplicitConcatSymbol(exp) {    
+function insertExplicitConcatOperator(exp) {    
     let output = '';
 
     for (let i = 0; i < exp.length; i++) {
@@ -27,14 +27,15 @@ function peek(stack) {
     return stack.length && stack[stack.length - 1];
 }
 
+const operatorPrecedence = {
+    '.': 0,
+    '|': 1,
+    '*': 2
+};
+
 function toPostfix(exp) {
     let output = '';
     const operatorStack = [];
-    const operatorPrecedence = {
-        '.': 0,
-        '|': 1,
-        '*': 2
-    };
 
     for (let i = 0; i < exp.length; i++) {
         const token = exp[i];
@@ -68,6 +69,6 @@ function toPostfix(exp) {
 };
 
 module.exports = {
-    insertExplicitConcatSymbol,
+    insertExplicitConcatOperator,
     toPostfix
 };

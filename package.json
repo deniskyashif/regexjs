@@ -3,6 +3,9 @@
     "version": "1.0.0",
     "description": "Finite State Machines",
     "main": "index.js",
+    "engines" : {
+        "node" : ">=10.11.0"
+    },
     "scripts": {
         "start": "node src/index",
         "test": "jest"

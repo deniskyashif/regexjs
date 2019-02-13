@@ -1,47 +1,47 @@
 const {
-    insertExplicitConcatSymbol,
+    insertExplicitConcatOperator,
     toPostfix
 } = require('../src/parser');
 
 describe('insertExplicitConcatSymbol tests', () => {
     test('call with "" should return ""', () => {
-        expect(insertExplicitConcatSymbol('')).toEqual('');
+        expect(insertExplicitConcatOperator('')).toEqual('');
     });
 
     test('call with "a*" should return "a*"', () => {
-        expect(insertExplicitConcatSymbol('a*')).toEqual('a*');
+        expect(insertExplicitConcatOperator('a*')).toEqual('a*');
     });
 
     test('call with "a|b" should return "a|b"', () => {
-        expect(insertExplicitConcatSymbol('a|b')).toEqual('a|b');
+        expect(insertExplicitConcatOperator('a|b')).toEqual('a|b');
     });
     
     test('call with "ab" should return "a.b"', () => {
-        expect(insertExplicitConcatSymbol('ab')).toEqual('a.b');
+        expect(insertExplicitConcatOperator('ab')).toEqual('a.b');
     });
 
     test('call with "abcabc" should return "a.b.c.a.b.c"', () => {
-        expect(insertExplicitConcatSymbol('abcabc')).toEqual('a.b.c.a.b.c');
+        expect(insertExplicitConcatOperator('abcabc')).toEqual('a.b.c.a.b.c');
     });
 
     test('call with "ab*" should return "a.b*"', () => {
-        expect(insertExplicitConcatSymbol('ab*')).toEqual('a.b*');
+        expect(insertExplicitConcatOperator('ab*')).toEqual('a.b*');
     });
 
     test('call with "ab*" should return "a*b*"', () => {
-        expect(insertExplicitConcatSymbol('a*b*')).toEqual('a*.b*');
+        expect(insertExplicitConcatOperator('a*b*')).toEqual('a*.b*');
     });
 
     test('call with "ab*c" should return "a.b*.c"', () => {
-        expect(insertExplicitConcatSymbol('ab*c')).toEqual('a.b*.c');
+        expect(insertExplicitConcatOperator('ab*c')).toEqual('a.b*.c');
     });
 
     test('call with "ab*(cdd)" should return "a.b*.(c.d.d)"', () => {
-        expect(insertExplicitConcatSymbol('ab*(cdd)')).toEqual('a.b*.(c.d.d)');
+        expect(insertExplicitConcatOperator('ab*(cdd)')).toEqual('a.b*.(c.d.d)');
     });
 
     test('call with "(a|b)*c" should return "(a|b)*.c"', () => {
-        expect(insertExplicitConcatSymbol('(a|b)*c')).toEqual('(a|b)*.c');
+        expect(insertExplicitConcatOperator('(a|b)*c')).toEqual('(a|b)*.c');
     });
 });
 
