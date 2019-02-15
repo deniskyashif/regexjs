@@ -132,8 +132,45 @@ function move(state, visited, input, position) {
     }
 }
 
+function addStatesToVisit(state, nextStates, visited) {
+    if (nextStates.indexOf(state) !== -1) {
+        return;
+    }
+
+    if (state.epsilonTransitions && state.epsilonTransitions.length) {
+        state.epsilonTransitions.forEach(s => {
+            if (visited.indexOf(s) === -1) {
+                visited.push(s);
+                addStatesToVisit(s, nextStates, visited);
+            }
+        });
+    } else {
+        nextStates.push(state);
+    }   
+}
+
+function search(nfa, word) {
+    let currentStates = [];
+    addStatesToVisit(nfa.start, currentStates, []);
+    
+    for (let i = 0; i < word.length && currentStates.length; i++) {
+        const symbol = word[i];
+        let nextStates = [];
+
+        currentStates.forEach(state => {
+            if (state.transitions[symbol]) {
+                state.transitions[symbol].forEach(s => addStatesToVisit(s, nextStates, []));
+            }            
+        });
+
+        currentStates = nextStates;
+    }
+
+    return currentStates.find(s => s.isEnd);
+}
+
 function recognize(nfa, word) {
-    return move(nfa.start, [], word, 0);
+    return search(nfa, word);
 }
 
 module.exports = {
