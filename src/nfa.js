@@ -106,9 +106,7 @@ function toNFA(postfixExp) {
 
     const stack = [];
 
-    for (let i = 0; i < postfixExp.length; i++) {
-        const token = postfixExp[i];
-
+    for (const token of postfixExp) {
         if(token === '*') {
             stack.push(closure(stack.pop()));
         } else if (token === '|') {
@@ -171,12 +169,12 @@ function recursiveBacktrackingSearch(state, visited, input, position) {
 */
 function addNextStates(state, nextStates, visited) {
     if (state.epsilonTransitions.length) {
-        state.epsilonTransitions.forEach(s => {
-            if (!visited.find(vs => vs === s)) {
-                visited.push(s);
-                addNextStates(s, nextStates, visited);
+        for (const st of state.epsilonTransitions) {
+            if (!visited.find(vs => vs === st)) {
+                visited.push(st);
+                addNextStates(st, nextStates, visited);
             }
-        });
+        }
     } else {
         nextStates.push(state);
     }
@@ -193,17 +191,16 @@ function search(nfa, word) {
     /* The initial set of current states is either the start state or
        the set of states reachable by epsilon transitions from the start state */
     addNextStates(nfa.start, currentStates, []);
-    
-    for (let i = 0; i < word.length && currentStates.length; i++) {
-        const symbol = word[i];
+
+    for (const symbol of word) {
         const nextStates = [];
 
-        currentStates.forEach(state => {
+        for (const state of currentStates) {
             const nextState = state.transition[symbol];
             if (nextState) {
                 addNextStates(nextState, nextStates, []);
             }            
-        });
+        }
 
         currentStates = nextStates;
     }

@@ -37,9 +37,7 @@ function toPostfix(exp) {
     let output = '';
     const operatorStack = [];
 
-    for (let i = 0; i < exp.length; i++) {
-        const token = exp[i];
-        
+    for (const token of exp) {
         if (token === '.' || token === '|' || token === '*') {
             while(operatorStack.length && peek(operatorStack) !== '('
                   && operatorPrecedence[peek(operatorStack)] >= operatorPrecedence[token]) {
