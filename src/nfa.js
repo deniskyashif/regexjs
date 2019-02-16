@@ -1,7 +1,18 @@
+/*
+  Thompson NFA Construction and Search.
+*/
+
+/*
+  A state in Thompson's NFA can either have 
+   - a single symbol transition to a state
+    or
+   - up to two epsilon transitions to another states
+  but not both.   
+*/
 function createState(isEnd) {
     return {
         isEnd,
-        transitions: {},
+        transition: {},
         epsilonTransitions: []
     };
 }
@@ -10,15 +21,16 @@ function addEpsilonTransition(from, to) {
     from.epsilonTransitions.push(to);
 }
 
+/*
+  Thompson's NFA state can have only one transition to another state for a given symbol.
+*/
 function addTransition(from, to, symbol) {
-    if(!from.transitions[symbol]) {
-        from.transitions[symbol] = [];
-    }
-
-    from.transitions[symbol].push(to);
+    from.transition[symbol] = to;
 }
 
-// constructs an NFA recognizing the empty string
+/*
+  Construct an NFA that recognizes only the empty string.
+*/
 function fromEpsilon() {
     const start = createState(false);
     const end = createState(true);
@@ -27,7 +39,9 @@ function fromEpsilon() {
     return { start, end };
 }
 
-// constructs an NFA recognizing a single character
+/* 
+   Construct an NFA that recognizes only a single character stirng.
+*/
 function fromSymbol(symbol) {
     const start = createState(false);
     const end = createState(true);
@@ -36,6 +50,9 @@ function fromSymbol(symbol) {
     return { start, end };
 }
 
+/* 
+   Concatenates two NFAs.
+*/
 function concat(first, second) {
     addEpsilonTransition(first.end, second.start);
     first.end.isEnd = false;
@@ -43,6 +60,9 @@ function concat(first, second) {
     return { start: first.start, end: second.end };
 }
 
+/* 
+   Unions two NFAs.
+*/
 function union(first, second) {
     const start = createState(false);
     addEpsilonTransition(start, first.start);
@@ -58,6 +78,10 @@ function union(first, second) {
     return { start, end };
 }
 
+
+/* 
+   Apply Closure (Kleene's Star) on an NFA.
+*/
 function closure(nfa) {
     const start = createState(false);
     const end = createState(true);
@@ -72,6 +96,9 @@ function closure(nfa) {
     return { start, end };
 }
 
+/*
+  Converts a postfix regular expression into a Thompson NFA.
+*/
 function toNFA(postfixExp) {
     if(postfixExp === '') {
         return fromEpsilon();
@@ -100,7 +127,13 @@ function toNFA(postfixExp) {
     return stack.pop();
 }
 
-function move(state, visited, input, position) {
+/*
+  Process a string through an NFA by recurisively (depth-first) traversing all the possible paths until finding a matching one.
+  
+  The NFA has N states, from each state it can go to at most N possible states, yet there might be at most 2^N possible paths, 
+  therefore, worst case it'll end up going through all of them until it finds a match (or not), resulting in very slow runtimes.
+*/
+function recursiveBacktrackingSearch(state, visited, input, position) {
     if(visited.includes(state)) {
         return false;
     }
@@ -112,64 +145,74 @@ function move(state, visited, input, position) {
             return true;
         }
 
-        if(state.epsilonTransitions.some(s => move(s, visited, input, position))) {
+        if(state.epsilonTransitions.some(s => recursiveBacktrackingSearch(s, visited, input, position))) {
             return true;
         }
     } else {
-        const transitions = state.transitions[input[position]];
+        const nextState = state.transition[input[position]];
 
-        if(transitions && transitions.length) {
-            if(transitions.some(s => move(s, [], input, position + 1))) {
+        if(nextState) {
+            if(recursiveBacktrackingSearch(nextState, [], input, position + 1)) {
                 return true;
             }
+        } else {
+            if(state.epsilonTransitions.some(s => recursiveBacktrackingSearch(s, visited, input, position))) {
+                return true;
+            }           
         }
-
-        if(state.epsilonTransitions.some(s => move(s, visited, input, position))) {
-            return true;
-        }        
 
         return false;
     }
 }
 
-function addStatesToVisit(state, nextStates, visited) {
-    if (nextStates.indexOf(state) !== -1) {
-        return;
-    }
-
-    if (state.epsilonTransitions && state.epsilonTransitions.length) {
+/* 
+   Follows through the epsilon transitions of a state until reaching
+   a state with a symbol transition which gets added to the set of next states.
+*/
+function addNextStates(state, nextStates, visited) {
+    if (state.epsilonTransitions.length) {
         state.epsilonTransitions.forEach(s => {
-            if (visited.indexOf(s) === -1) {
+            if (!visited.find(vs => vs === s)) {
                 visited.push(s);
-                addStatesToVisit(s, nextStates, visited);
+                addNextStates(s, nextStates, visited);
             }
         });
     } else {
         nextStates.push(state);
-    }   
+    }
 }
 
+/*
+  Process a string through an NFA. For each input symbol it transitions into in multiple states at the same time.
+  The string is matched if after reading the last symbol, is has transitioned into at least one end state.
+
+  For an NFA with N states in can be at at most N states at a time. This algorighm finds a match by processing the input word once.
+*/
 function search(nfa, word) {
     let currentStates = [];
-    addStatesToVisit(nfa.start, currentStates, []);
+    /* The initial set of current states is either the start state or
+       the set of states reachable by epsilon transitions from the start state */
+    addNextStates(nfa.start, currentStates, []);
     
     for (let i = 0; i < word.length && currentStates.length; i++) {
         const symbol = word[i];
-        let nextStates = [];
+        const nextStates = [];
 
         currentStates.forEach(state => {
-            if (state.transitions[symbol]) {
-                state.transitions[symbol].forEach(s => addStatesToVisit(s, nextStates, []));
+            const nextState = state.transition[symbol];
+            if (nextState) {
+                addNextStates(nextState, nextStates, []);
             }            
         });
 
         currentStates = nextStates;
     }
 
-    return currentStates.find(s => s.isEnd);
+    return currentStates.find(s => s.isEnd) ? true : false;
 }
 
 function recognize(nfa, word) {
+    // return recursiveBacktrackingSearch(nfa.start, [], word, 0);
     return search(nfa, word);
 }
 
