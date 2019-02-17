@@ -5,9 +5,7 @@ function createMatcher(exp) {
     const postfixExp = toPostfix(insertExplicitConcatOperator(exp));
     const nfa = toNFA(postfixExp);
 
-    return function(word) {
-        return recognize(nfa, word);
-    };
+    return word => recognize(nfa, word);
 }
 
 module.exports = { createMatcher };

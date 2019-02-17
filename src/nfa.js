@@ -167,12 +167,12 @@ function recursiveBacktrackingSearch(state, visited, input, position) {
    Follows through the epsilon transitions of a state until reaching
    a state with a symbol transition which gets added to the set of next states.
 */
-function addNextStates(state, nextStates, visited) {
+function addNextState(state, nextStates, visited) {
     if (state.epsilonTransitions.length) {
         for (const st of state.epsilonTransitions) {
             if (!visited.find(vs => vs === st)) {
                 visited.push(st);
-                addNextStates(st, nextStates, visited);
+                addNextState(st, nextStates, visited);
             }
         }
     } else {
@@ -190,7 +190,7 @@ function search(nfa, word) {
     let currentStates = [];
     /* The initial set of current states is either the start state or
        the set of states reachable by epsilon transitions from the start state */
-    addNextStates(nfa.start, currentStates, []);
+    addNextState(nfa.start, currentStates, []);
 
     for (const symbol of word) {
         const nextStates = [];
@@ -198,7 +198,7 @@ function search(nfa, word) {
         for (const state of currentStates) {
             const nextState = state.transition[symbol];
             if (nextState) {
-                addNextStates(nextState, nextStates, []);
+                addNextState(nextState, nextStates, []);
             }            
         }
 
