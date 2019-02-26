@@ -61,4 +61,12 @@ describe('createMatcher tests', () => {
         expect(match('b')).toBeFalsy();
         expect(match('ababab')).toBeFalsy();
     });
+
+    test('from "abc|def" should recognize strings of abc or def', () => {
+        const match = createMatcher('abc|def');
+        expect(match('abc')).toBeTruthy();
+        expect(match('def')).toBeTruthy();
+        expect(match('ab')).toBeFalsy();
+        expect(match('ef')).toBeFalsy();
+    })
 });

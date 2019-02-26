@@ -15,7 +15,7 @@ describe('insertExplicitConcatSymbol tests', () => {
     test('call with "a|b" should return "a|b"', () => {
         expect(insertExplicitConcatOperator('a|b')).toEqual('a|b');
     });
-    
+
     test('call with "ab" should return "a.b"', () => {
         expect(insertExplicitConcatOperator('ab')).toEqual('a.b');
     });
@@ -66,10 +66,14 @@ describe('toPostfix tests', () => {
         expect(toPostfix('a*.b')).toEqual('a*b.');
     });
 
+    test('call with "a.b|c.d" should return "ab.cd.|"', () => {
+        expect(toPostfix('a.b|c.d')).toEqual('ab.cd.|');
+    });
+
     test('call with "a|b*" should return "ab*|"', () => {
         expect(toPostfix('a|b*')).toEqual('ab*|');
     });
-    
+
     test('call with "a.(b|c)*.d" should return "abc|*.d."', () => {
         expect(toPostfix('a.(b|c)*.d')).toEqual('abc|*.d.');
     });
