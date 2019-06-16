@@ -40,7 +40,7 @@ function fromEpsilon() {
 }
 
 /* 
-   Construct an NFA that recognizes only a single character stirng.
+   Construct an NFA that recognizes only a single character string.
 */
 function fromSymbol(symbol) {
     const start = createState(false);
