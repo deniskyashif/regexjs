@@ -1,4 +1,4 @@
-## regexjs
+# regexjs
 
 A simple regular expression engine implemented in JavaScript. It supports concatenation, union (|) and closure (*) operations as well as grouping. It follows Ken Thompson's algorithm for constructing an NFA from a regular expression.
 
