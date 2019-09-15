@@ -1,10 +1,16 @@
 const { insertExplicitConcatOperator, toPostfix } = require('./parser');
-const { toNFA, recognize } = require('./nfa');
+const { toNFA, toNFAFromInfixExp, recognize } = require('./nfa');
 
 function createMatcher(exp) {
-    const postfixExp = toPostfix(insertExplicitConcatOperator(exp));
-    const nfa = toNFA(postfixExp);
+    const expWithConcatenationOperator = insertExplicitConcatOperator(exp);
+    
+    // Generates an NFA using a stack
+    // const postfixExp = toPostfix(expWithConcatenationOperator);
+    // const nfa = toNFA(postfixExp);
 
+    // Generates an NFA by constructing a parse tree
+    const nfa = toNFAFromInfixExp(expWithConcatenationOperator);
+    
     return word => recognize(nfa, word);
 }
 

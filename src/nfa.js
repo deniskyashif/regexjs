@@ -100,7 +100,7 @@ function closure(nfa) {
   Converts a postfix regular expression into a Thompson NFA.
 */
 function toNFA(postfixExp) {
-    if(postfixExp === '') {
+    if (postfixExp === '') {
         return fromEpsilon();
     }
 
@@ -123,6 +123,61 @@ function toNFA(postfixExp) {
     }
 
     return stack.pop();
+}
+
+/*
+  Regex to NFA construction using a parse tree.
+*/
+const antlr = require('antlr4');
+const RegexLexer = require('./grammar/RegexLexer').RegexLexer;
+const RegexParser = require('./grammar/RegexParser').RegexParser;
+const RegexVisitor = require('./grammar/RegexVisitor').RegexVisitor;
+
+class RegexToNFAVisitor extends RegexVisitor {
+    visitStart(ctx) {
+        return this.visit(ctx.getChild(0));
+    }
+
+    visitExpr(ctx) {
+        if (ctx.children.length === 1) {
+            return fromSymbol(ctx.getChild(0).getText());
+        }
+
+        if (ctx.children.length === 2 && ctx.getChild(1).getText() === '*') {
+            const leftEvaluated = this.visit(ctx.getChild(0));
+            return closure(leftEvaluated);
+        }
+
+        const left = ctx.getChild(0);
+        const mid = ctx.getChild(1);
+        const right = ctx.getChild(2);
+
+        if (left.getText() === '(' && right.getText() === ')') {
+            return this.visit(mid);
+        }
+
+        const leftEvaluated = this.visit(left);
+        const rightEvaluated = this.visit(right);
+
+        return mid.getText() === '|'
+            ? union(leftEvaluated, rightEvaluated)
+            : concat(leftEvaluated, rightEvaluated);
+    }
+}
+
+function toNFAFromInfixExp(infixExp) {
+    if (infixExp === '') {
+        return fromEpsilon();
+    }
+    
+    const chars = new antlr.InputStream(infixExp);
+    const lexer = new RegexLexer(chars);
+    const tokens = new antlr.CommonTokenStream(lexer);
+    const parser = new RegexParser(tokens);
+    const parseTree = parser.start();
+    const nfa = parseTree.accept(new RegexToNFAVisitor());
+
+    return nfa;
 }
 
 /*
@@ -215,5 +270,6 @@ function recognize(nfa, word) {
 
 module.exports = {
     toNFA,
+    toNFAFromInfixExp,
     recognize
 };
