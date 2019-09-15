@@ -27,5 +27,8 @@
     "homepage": "https://github.com/deniskyashif/regexjs#readme",
     "devDependencies": {
         "jest": "^24.0.0"
+    },
+    "dependencies": {
+        "antlr4": "^4.7.2"
     }
 }

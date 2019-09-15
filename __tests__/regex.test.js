@@ -68,5 +68,5 @@ describe('createMatcher tests', () => {
         expect(match('def')).toBeTruthy();
         expect(match('ab')).toBeFalsy();
         expect(match('ef')).toBeFalsy();
-    })
+    });
 });
