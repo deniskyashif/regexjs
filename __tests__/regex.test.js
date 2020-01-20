@@ -69,4 +69,15 @@ describe('createMatcher tests', () => {
         expect(match('ab')).toBeFalsy();
         expect(match('ef')).toBeFalsy();
     });
+
+    test('from "a(b*|c)" should recognize strings starting with a followed by b\'s or a single c', () => {
+        const match = createMatcher('a(b*|c)');
+        expect(match('ac')).toBeTruthy();
+        expect(match('abbbb')).toBeTruthy();
+        expect(match('ab')).toBeTruthy();
+        expect(match('a')).toBeTruthy();
+        expect(match('abc')).toBeFalsy();
+        expect(match('acc')).toBeFalsy();
+        expect(match('')).toBeFalsy();
+    });
 });
