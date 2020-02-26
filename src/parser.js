@@ -1,3 +1,35 @@
+function insertExpandedOneOrMoreOperator(exp) {
+    // We rewrite, say:
+    //    x*(a|b)+y+z*
+    // as:
+    //    x*((a|b)(a|b)*)(yy*)z*
+    //
+    let output = exp;
+    let index = output.indexOf('+');
+
+    // Do we have one or more term ending in '+'?
+    while (index > 0) {
+
+        // If so, rewrite them in-place (until we've exhausted all these '+'s)
+        let h = index - 1;
+        let c = 0;
+
+        // If a closing parenthesis ')' is immediately preceding the '+',
+        // we walk back, to lookup the balanced open parenthesis that matches it:
+        while ((c += (output[h] === ')' ? 1 : output[h] === '(' ? -1 : 0)) !== 0) {
+            h--;
+        }
+
+        const lhs = output.substr(0, h);
+        const mid = output.substr(h, index - h); // That'd be the "(a|b)" and "y" term in the above example
+        const rhs = output.substr(index + 1);
+
+        output = lhs + "(" + mid + mid + "*)" + rhs; // Rewrite "...<term>+..." as "...(<term><term>*)..."
+        index = output.indexOf('+');
+    }
+    return output;
+};
+
 function insertExplicitConcatOperator(exp) {
     let output = '';
 
@@ -67,6 +99,7 @@ function toPostfix(exp) {
 };
 
 module.exports = {
+	insertExpandedOneOrMoreOperator,
     insertExplicitConcatOperator,
     toPostfix
 };

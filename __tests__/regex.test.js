@@ -62,6 +62,39 @@ describe('createMatcher tests', () => {
         expect(match('ababab')).toBeFalsy();
     });
 
+    test('from "(a|b)+c" should recognize strings with a greater-than-zero number of a\'s and b\'s ending with c', () => {
+        const match = createMatcher('(a|b)+c');
+        expect(match('c')).toBeFalsy(); // (missing leading a's or b's)
+        expect(match('ac')).toBeTruthy();
+        expect(match('ababc')).toBeTruthy();
+        expect(match('bbbc')).toBeTruthy();
+        expect(match('aaaaaaac')).toBeTruthy();
+        expect(match('ac')).toBeTruthy();
+        expect(match('bac')).toBeTruthy();
+        expect(match('abbbbc')).toBeTruthy();
+        expect(match('cc')).toBeFalsy(); // (missing leading a's or b's)
+        expect(match('a')).toBeFalsy(); // (missing trailing c)
+        expect(match('b')).toBeFalsy(); // (idem)
+        expect(match('ababab')).toBeFalsy(); // (idem)
+    });
+
+    test('from "0x(0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f)+" should recognize the writing of an hexadecimal number', () => {
+        const match = createMatcher('0x(0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f)+');
+        expect(match('0')).toBeFalsy(); // (missing preamble)
+        expect(match('x')).toBeFalsy(); // (bad preamble #1)
+        expect(match('x0')).toBeFalsy(); // (bad preamble #2)
+        expect(match('0x')).toBeFalsy(); // (missing digits)
+        expect(match('0x0')).toBeTruthy();
+        expect(match('0x1')).toBeTruthy();
+        expect(match('0x2')).toBeTruthy();
+        expect(match('0x3')).toBeTruthy();
+        expect(match('0xf')).toBeTruthy();
+        expect(match('0x0a')).toBeTruthy();
+        expect(match('0x20')).toBeTruthy();
+        expect(match('0xfee1600d')).toBeTruthy();
+        expect(match('0xfee1Dead')).toBeFalsy(); // (capital 'D' not a recognized hexadecimal digit)
+    });
+
     test('from "abc|def" should recognize strings of abc or def', () => {
         const match = createMatcher('abc|def');
         expect(match('abc')).toBeTruthy();
