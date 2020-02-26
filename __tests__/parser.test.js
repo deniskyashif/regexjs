@@ -1,9 +1,28 @@
 const {
+    insertExpandedOneOrMoreOperator,
     insertExplicitConcatOperator,
     toPostfix
 } = require('../src/parser');
 
-describe('insertExplicitConcatSymbol tests', () => {
+describe('insertExpandedOneOrMoreOperator tests', () => {
+    test('call with "" should return ""', () => {
+        expect(insertExpandedOneOrMoreOperator('')).toEqual('');
+    });
+    test('call with "ab*c" should return "ab*c"', () => {
+        expect(insertExpandedOneOrMoreOperator('ab*c')).toEqual('ab*c');
+    });
+    test('call with "a+" should return "(aa*)"', () => {
+        expect(insertExpandedOneOrMoreOperator('a+')).toEqual('(aa*)');
+    });
+    test('call with "ab+c" should return "a(bb*)c"', () => {
+        expect(insertExpandedOneOrMoreOperator('ab+c')).toEqual('a(bb*)c');
+    });
+    test('call with "uv+(a|b)+cw+" should return "u(vv*)((a|b)(a|b)*)c(ww*)"', () => {
+        expect(insertExpandedOneOrMoreOperator('uv+(a|b)+cw+')).toEqual('u(vv*)((a|b)(a|b)*)c(ww*)');
+    });
+});
+
+describe('insertExplicitConcatOperator tests', () => {
     test('call with "" should return ""', () => {
         expect(insertExplicitConcatOperator('')).toEqual('');
     });

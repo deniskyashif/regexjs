@@ -99,7 +99,7 @@ function toPostfix(exp) {
 };
 
 module.exports = {
-	insertExpandedOneOrMoreOperator,
+    insertExpandedOneOrMoreOperator,
     insertExplicitConcatOperator,
     toPostfix
 };
