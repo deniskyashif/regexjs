@@ -97,6 +97,23 @@ function closure(nfa) {
 }
 
 /*
+    Zero-or-one of an NFA.
+*/
+
+function zeroOrOne(nfa) {
+    const start = createState(false);
+    const end = createState(true);
+
+    addEpsilonTransition(start, end);
+    addEpsilonTransition(start, nfa.start);
+
+    addEpsilonTransition(nfa.end, end);
+    nfa.end.isEnd = false;
+
+    return { start, end };
+}
+
+/*
   Converts a postfix regular expression into a Thompson NFA.
 */
 function toNFA(postfixExp) {
@@ -109,6 +126,8 @@ function toNFA(postfixExp) {
     for (const token of postfixExp) {
         if(token === '*') {
             stack.push(closure(stack.pop()));
+        } else if(token === "?"){
+            stack.push(zeroOrOne(stack.pop()));
         } else if (token === '|') {
             const right = stack.pop();
             const left = stack.pop();

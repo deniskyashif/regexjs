@@ -23,6 +23,16 @@ describe('createMatcher tests', () => {
         expect(match('aba')).toBeFalsy();
     });
 
+    test('from a? should recognize strings of exactly one or zero number of a\'s', () => {
+        const match = createMatcher('a?');
+        expect(match('')).toBeTruthy();
+        expect(match('a')).toBeTruthy();
+        expect(match('aa')).toBeFalsy();
+        expect(match('aaa')).toBeFalsy();
+        expect(match('aba')).toBeFalsy();
+        expect(match('b')).toBeFalsy();
+    });
+
     test('from a*b should recognize strings of arbitrary number of a\'s ending with b', () => {
         const match = createMatcher('a*b');
         expect(match('')).toBeFalsy();
