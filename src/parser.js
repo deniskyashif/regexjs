@@ -12,7 +12,7 @@ function insertExplicitConcatOperator(exp) {
         if (i < exp.length - 1) {
             const lookahead = exp[i+1];
 
-            if(lookahead === '*' || lookahead === '|' || lookahead === ')') {
+            if(lookahead === '*' || lookahead === '?' || lookahead === '+' || lookahead === '|' || lookahead === ')') {
                 continue;
             }
 
@@ -30,7 +30,9 @@ function peek(stack) {
 const operatorPrecedence = {
     '|': 0,
     '.': 1,
-    '*': 2
+    '?': 2,
+    '*': 2,
+    '+': 2
 };
 
 function toPostfix(exp) {
@@ -38,7 +40,7 @@ function toPostfix(exp) {
     const operatorStack = [];
 
     for (const token of exp) {
-        if (token === '.' || token === '|' || token === '*') {
+        if (token === '.' || token === '|' || token === '*' || token === '?' || token === '+') {
             while(operatorStack.length && peek(operatorStack) !== '('
                   && operatorPrecedence[peek(operatorStack)] >= operatorPrecedence[token]) {
                 output += operatorStack.pop();
