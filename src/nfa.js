@@ -35,7 +35,7 @@ function fromEpsilon() {
     const start = createState(false);
     const end = createState(true);
     addEpsilonTransition(start, end);
-    
+
     return { start, end };
 }
 
@@ -117,7 +117,7 @@ function zeroOrOne(nfa) {
     One on more of an NFA.
 */
 
-function oneOrMore(nfa){
+function oneOrMore(nfa) {
     const start = createState(false);
     const end = createState(true);
 
@@ -141,11 +141,11 @@ function toNFA(postfixExp) {
     const stack = [];
 
     for (const token of postfixExp) {
-        if(token === '*') {
+        if (token === '*') {
             stack.push(closure(stack.pop()));
-        } else if(token === "?"){
+        } else if (token === "?") {
             stack.push(zeroOrOne(stack.pop()));
-        } else if(token === "+"){
+        } else if (token === "+") {
             stack.push(oneOrMore(stack.pop()));
         } else if (token === '|') {
             const right = stack.pop();
@@ -207,7 +207,7 @@ function toNFAFromInfixExp(infixExp) {
     if (infixExp === '') {
         return fromEpsilon();
     }
-    
+
     const chars = new antlr.InputStream(infixExp);
     const lexer = new RegexLexer(chars);
     const tokens = new antlr.CommonTokenStream(lexer);
@@ -225,31 +225,31 @@ function toNFAFromInfixExp(infixExp) {
   therefore, worst case it'll end up going through all of them until it finds a match (or not), resulting in very slow runtimes.
 */
 function recursiveBacktrackingSearch(state, visited, input, position) {
-    if(visited.includes(state)) {
+    if (visited.includes(state)) {
         return false;
     }
 
     visited.push(state);
 
-    if(position === input.length) {
-        if(state.isEnd) {
+    if (position === input.length) {
+        if (state.isEnd) {
             return true;
         }
 
-        if(state.epsilonTransitions.some(s => recursiveBacktrackingSearch(s, visited, input, position))) {
+        if (state.epsilonTransitions.some(s => recursiveBacktrackingSearch(s, visited, input, position))) {
             return true;
         }
     } else {
         const nextState = state.transition[input[position]];
 
-        if(nextState) {
-            if(recursiveBacktrackingSearch(nextState, [], input, position + 1)) {
+        if (nextState) {
+            if (recursiveBacktrackingSearch(nextState, [], input, position + 1)) {
                 return true;
             }
         } else {
-            if(state.epsilonTransitions.some(s => recursiveBacktrackingSearch(s, visited, input, position))) {
+            if (state.epsilonTransitions.some(s => recursiveBacktrackingSearch(s, visited, input, position))) {
                 return true;
-            }           
+            }
         }
 
         return false;
@@ -292,7 +292,7 @@ function search(nfa, word) {
             const nextState = state.transition[symbol];
             if (nextState) {
                 addNextState(nextState, nextStates, []);
-            }            
+            }
         }
 
         currentStates = nextStates;
