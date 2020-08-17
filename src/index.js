@@ -1,6 +1,10 @@
 const { createMatcher } = require('./regex');
 const readline = require('readline');
 
+const match = createMatcher('(a|b)*c');
+
+return;
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout

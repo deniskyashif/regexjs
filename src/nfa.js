@@ -122,7 +122,6 @@ function oneOrMore(nfa) {
     const end = createState(true);
 
     addEpsilonTransition(start, nfa.start);
-
     addEpsilonTransition(nfa.end, end);
     addEpsilonTransition(nfa.end, nfa.start);
     nfa.end.isEnd = false;
@@ -166,56 +165,62 @@ function toNFA(postfixExp) {
 /*
   Regex to NFA construction using a parse tree.
 */
-const antlr = require('antlr4');
-const RegexLexer = require('./grammar/RegexLexer').RegexLexer;
-const RegexParser = require('./grammar/RegexParser').RegexParser;
-const RegexVisitor = require('./grammar/RegexVisitor').RegexVisitor;
+const { toParseTree } = require('./parser2');
 
-class RegexToNFAVisitor extends RegexVisitor {
-    visitStart(ctx) {
-        return this.visit(ctx.getChild(0));
+function toNFAfromParseTree(root) {
+    if (root.label === 'Expr') {
+        const term = toNFAfromParseTree(root.children[0]);
+        if (root.children.length === 3) // Expr -> Term '|' Expr
+            return union(term, toNFAfromParseTree(root.children[2]));
+
+        return term; // Expr -> Term
     }
 
-    visitExpr(ctx) {
-        if (ctx.children.length === 1) {
-            return fromSymbol(ctx.getChild(0).getText());
-        }
+    if (root.label === 'Term') {
+        const factor = toNFAfromParseTree(root.children[0]);
+        if (root.children.length === 2) // Term -> Factor Term
+            return concat(factor, toNFAfromParseTree(root.children[1]));
 
-        if (ctx.children.length === 2 && ctx.getChild(1).getText() === '*') {
-            const leftEvaluated = this.visit(ctx.getChild(0));
-            return closure(leftEvaluated);
-        }
-
-        const left = ctx.getChild(0);
-        const mid = ctx.getChild(1);
-        const right = ctx.getChild(2);
-
-        if (left.getText() === '(' && right.getText() === ')') {
-            return this.visit(mid);
-        }
-
-        const leftEvaluated = this.visit(left);
-        const rightEvaluated = this.visit(right);
-
-        return mid.getText() === '|'
-            ? union(leftEvaluated, rightEvaluated)
-            : concat(leftEvaluated, rightEvaluated);
+        return factor; // Term -> Factor
     }
+
+    if (root.label === 'Factor') {
+        const atom = toNFAfromParseTree(root.children[0]);
+        if (root.children.length === 2) { // Factor -> Atom MetaChar
+            const meta = root.children[1].label;
+            if (meta === '*')
+                return closure(atom);
+            if (meta === '+')
+                return oneOrMore(atom);
+            if (meta === '?')
+                return zeroOrOne(atom);
+        }
+
+        return atom; // Factor -> Atom
+    }
+
+    if (root.label === 'Atom') {
+        if (root.children.length === 3) // Atom -> '(' Expr ')'
+            return toNFAfromParseTree(root.children[1]);
+
+        return toNFAfromParseTree(root.children[0]); // Atom -> Char
+    }
+
+    if (root.label === 'Char') {
+        if (root.children.length === 2) // Char -> '\' AnyChar
+            return fromSymbol(root.children[1].label);
+
+        return fromSymbol(root.children[0].label); // Char -> AnyCharExceptMeta
+    }
+
+    throw new Error('Unrecognized node label ' + root.label);
 }
 
 function toNFAFromInfixExp(infixExp) {
-    if (infixExp === '') {
+    if (infixExp === '')
         return fromEpsilon();
-    }
 
-    const chars = new antlr.InputStream(infixExp);
-    const lexer = new RegexLexer(chars);
-    const tokens = new antlr.CommonTokenStream(lexer);
-    const parser = new RegexParser(tokens);
-    const parseTree = parser.start();
-    const nfa = parseTree.accept(new RegexToNFAVisitor());
-
-    return nfa;
+    return toNFAfromParseTree(toParseTree(infixExp));
 }
 
 /*
